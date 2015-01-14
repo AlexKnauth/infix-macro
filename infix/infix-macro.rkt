@@ -16,8 +16,17 @@
 (define-syntax-parameter ^ (make-rename-transformer #'rkt:expt))
 
 (begin-for-syntax
-  (define-syntax-class op #:literals (+ * - / ^)
-    [pattern (~or + * - / ^)])
+  (define disappeared-use 'disappeared-use)
+  (define (disap stx . ids)
+    (define stx.ids (or (syntax-property stx disappeared-use) '()))
+    (syntax-property stx disappeared-use (append stx.ids (map syntax-local-introduce ids))))
+  (define-syntax-class + [pattern (~and (~literal +) +)])
+  (define-syntax-class * [pattern (~and (~literal *) *)])
+  (define-syntax-class - [pattern (~and (~literal -) -)])
+  (define-syntax-class / [pattern (~and (~literal /) /)])
+  (define-syntax-class ^ [pattern (~and (~literal ^) ^)])
+  (define-syntax-class op
+    [pattern (~or :+ :* :- :/ :^)])
   (define-syntax-class mexpr
     [pattern (~and norm:expr (~not :op))])
   (define-splicing-syntax-class sum
@@ -30,20 +39,20 @@
              #:with norm #'a.norm]
     [pattern (~seq (~or a:mexpt a:*/expt) b:*/expt ...)
              #:with norm #'(* a.norm b.norm ...)])
-  (define-splicing-syntax-class mexpt #:literals (^)
+  (define-splicing-syntax-class mexpt
     [pattern (~seq a:mexpr)
              #:with norm #'a.norm]
-    [pattern (~seq a:mexpr ^ b:mexpr)
+    [pattern (~seq a:mexpr ^:^ b:mexpr)
              #:with norm #'(^ a.norm b.norm)])
-  (define-splicing-syntax-class +-product #:literals (+ -)
-    [pattern (~seq + a:product)
-             #:with norm #'a.norm]
-    [pattern (~seq - a:product)
+  (define-splicing-syntax-class +-product
+    [pattern (~seq +:+ a:product)
+             #:with norm (disap #'a.norm #'+)]
+    [pattern (~seq -:- a:product)
              #:with norm #'(- a.norm)])
-  (define-splicing-syntax-class */expt #:literals (* /)
-    [pattern (~seq * a:mexpt)
-             #:with norm #'a.norm]
-    [pattern (~seq / a:mexpt)
+  (define-splicing-syntax-class */expt
+    [pattern (~seq *:* a:mexpt)
+             #:with norm (disap #'a.norm #'*)]
+    [pattern (~seq /:/ a:mexpt)
              #:with norm #'(/ a.norm)])
   )
 (define-syntax :

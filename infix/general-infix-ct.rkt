@@ -2,6 +2,7 @@
 
 (provide base-parser
          binary-op
+         unary-prefix-op
          add/sub-like-op
          add-op
          mult-op
@@ -95,6 +96,14 @@
     [(a:pexpr) #'a.norm]
     [(a:pexpr op:op-id b:pexpr)
      #'(op.op a.norm b.norm)]))
+
+;; unary-prefix-op : [#:sym Sym #:id Id -> Infix-Op] ; not really infix, but this is more general
+(define (unary-prefix-op #:sym sym #:id id-stx)
+  (defstxcls/op op-id #:sym sym #:attr op #:id id-stx)
+  (op/stxparser (pexpr #:sub-pat (~not :op-id))
+    [(a:pexpr) #'a.norm]
+    [(op:op-id a:pexpr)
+     #'(op.op a.norm)]))
     
 
 ;; add-op/sub-like-op : [#:add-sym Sym #:neg-sym Sym #:add-id Id #:neg-id Id -> Infix-Op]

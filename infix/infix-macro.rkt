@@ -19,4 +19,9 @@
   (check-equal? (: 6 / 2 ^ 2 * 3) 9/2)
   (define a 1)
   (check-equal? (: a + 1) 2)
+  (check-equal? (: #:with 1 + 2 #:as a
+                   #:let b = a + 4
+                   #:let c = a + b #:in
+                   a + b + c)
+                20)
   )

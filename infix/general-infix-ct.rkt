@@ -3,6 +3,7 @@
 (provide base-parser
          binary-op
          unary-prefix-op
+         associative-binary-op
          add/sub-like-op
          add-op
          mult-op
@@ -104,7 +105,14 @@
     [(a:pexpr) #'a.norm]
     [(op:op-id a:pexpr)
      #'(op.op a.norm)]))
-    
+
+;; associative-binary-op : [#:sym Sym #:id Id -> Infix-Op]
+(define (associative-binary-op #:sym sym #:id id-stx)
+  (defstxcls/op op-id #:sym sym #:attr op #:id id-stx)
+  (op/stxparser (pexpr #:sub-pat (~not :op-id))
+    [(a:pexpr) #'a.norm]
+    [(a:pexpr (~seq op1:op-id b:pexpr) (~seq op:op-id c:pexpr) ...)
+     #'(op1.op a.norm b.norm c.norm ...)]))
 
 ;; add-op/sub-like-op : [#:add-sym Sym #:neg-sym Sym #:add-id Id #:neg-id Id -> Infix-Op]
 (define (add/sub-like-op #:add-sym add-sym #:neg-sym neg-sym #:add-id add-id #:neg-id neg-id)

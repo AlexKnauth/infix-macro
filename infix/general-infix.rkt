@@ -13,5 +13,5 @@
 (define-simple-macro (define-infix-macro/infix-parser macro-id:id parser-expr:expr)
   (define-syntax macro-id (infix-parser->transformer parser-expr)))
 
-(define-infix-macro/infix-parser : let+-*/^-parser)
+(define-infix-macro/infix-parser : let+-*/^sqrt-etc-parser)
 

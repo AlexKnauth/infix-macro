@@ -1,6 +1,8 @@
 #lang racket/base
 
 (provide base-parser
+         op-combine
+         ops->parser
          binary-op
          unary-prefix-op
          associative-binary-op
@@ -9,8 +11,10 @@
          mult-op
          expt-op
          let-op
+         sqrt-sin-etc-op
          +-*/^-parser
          let+-*/^-parser
+         let+-*/^sqrt-etc-parser
          infix-parser->transformer
          defstxcls/infix-parser
          defstxcls/op
@@ -46,6 +50,13 @@
 (define (base-parser stxlst)
   (syntax-parse stxlst
     [(a) #'a]))
+
+;; op-combine : Infix-Op ... -> Infix-Op
+(define op-combine compose1)
+
+;; ops->parser : Infix-Op ... -> Infix-Parser
+(define (ops->parser . ops)
+  ((apply op-combine ops) base-parser))
 
 (define-simple-macro (defstxcls/infix-parser stxcls-id:id p-expr:expr #:sub-pat sub-pat)
   #:with ooo (quote-syntax ...)
@@ -157,6 +168,32 @@
 ;; let+-*/^-parser : Infix-Parser
 (define let+-*/^-parser
   (let-op +-*/^-parser))
+
+;; sqrt-sin-etc-op : Infix-Op
+(define (sqrt-sin-etc-op p)
+  (define-simple-macro (defmultistxcls [id:id param:id] ...)
+    (begin (defstxcls/op id #:sym 'id #:attr op #:id #'param) ...))
+  (defmultistxcls
+    [sqrt sqrrt]
+    [sin sine]
+    [cos cosine]
+    [tan tang]
+    [asin asine]
+    [acos acosine]
+    [atan atang]
+    [abs absval]
+    [ln log_e])
+  (define-simple-macro (define-op-stxcls op:id pat ...)
+    (define-syntax-class op #:attributes (op) [pattern pat] ...))
+  (define-op-stxcls op :sqrt :sin :cos :tan :asin :acos :atan :abs :ln)
+  (defstxcls/infix-parser pexpr p #:sub-pat (~not :op))
+  (stxcls-infix-parser/rec op-expr #:attributes (norm)
+    [pattern (~seq a:pexpr) #:with norm #'a.norm]
+    [pattern (~seq op:op a:op-expr) #:with norm #'(op.op a.norm)]))
+
+;; let+-*/^sqrt-etc-parser : Infix-Parser
+(define let+-*/^sqrt-etc-parser
+  (ops->parser let-op add-op mult-op sqrt-sin-etc-op expt-op))
 
 
 

@@ -24,4 +24,8 @@
                    #:let c = a + b #:in
                    a + b + c)
                 20)
+  (check-equal? (: sqrt 4 + 1) 3)
+  (check-equal? (: sqrt 2 ^ 4 / 2) 2)
+  (check-equal? (: sin cos 5) (sin (cos 5)))
+  (check-equal? (: cos sin 5) (cos (sin 5)))
   )

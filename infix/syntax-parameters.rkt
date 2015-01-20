@@ -3,13 +3,19 @@
 (provide add mult neg inv ex)
 
 (require racket/stxparam
+         syntax/parse/define
          (prefix-in rkt: racket/base)
          (for-syntax racket/base
                      ))
 
-(define-syntax-parameter add (make-rename-transformer #'rkt:+))
-(define-syntax-parameter mult (make-rename-transformer #'rkt:*))
-(define-syntax-parameter neg (make-rename-transformer #'rkt:-))
-(define-syntax-parameter inv (make-rename-transformer #'rkt:/))
-(define-syntax-parameter ex (make-rename-transformer #'rkt:expt))
+(define-simple-macro (defstxprmrnmrs [param:id rnm:id] ...)
+  (begin (define-syntax-parameter param (make-rename-transformer #'rnm)) ...))
+
+(defstxprmrnmrs
+  [add rkt:+]
+  [mult rkt:*]
+  [neg rkt:-]
+  [inv rkt:/]
+  [ex rkt:expt]
+  )
 

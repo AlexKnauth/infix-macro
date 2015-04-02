@@ -2,7 +2,10 @@
 
 (provide :)
 
-(require "general-infix.rkt")
+(require "general-infix.rkt"
+         (for-syntax racket/base
+                     "general-infix-ct.rkt"
+                     ))
 (module+ test
   (require rackunit))
 
@@ -28,4 +31,8 @@
   (check-equal? (: sqrt 2 ^ 4 / 2) 2)
   (check-equal? (: sin cos 5) (sin (cos 5)))
   (check-equal? (: cos sin 5) (cos (sin 5)))
+  (define-infix-macro/infix-parser ::
+    (ops->parser (unary-prefix-op #:sym 'sqrt #:id #'sqrt) add-op expt-op))
+  (check-equal? (: sqrt 3 ^ 2 + 4 ^ 2) 19)
+  (check-equal? (:: sqrt 3 ^ 2 + 4 ^ 2) 5)
   )

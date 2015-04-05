@@ -4,5 +4,5 @@
 
 (define deps '("base"))
 
-(define bulid-deps '("rackunit-lib"))
+(define build-deps '("rackunit-lib"))
 

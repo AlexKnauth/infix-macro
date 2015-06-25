@@ -29,7 +29,7 @@
          racket/bool
          syntax/parse/define
          (for-template racket/base
-                       "syntax-parameters.rkt")
+                       (prefix-in rkt: racket/base))
          (for-syntax racket/base
                      syntax/parse
                      ))
@@ -141,13 +141,13 @@
        #'(add a.norm b.norm ...)])))
 
 ;; add-op : Infix-Op
-(define add-op (add/sub-like-op #:add-sym '+ #:neg-sym '- #:add-id #'add #:neg-id #'neg))
+(define add-op (add/sub-like-op #:add-sym '+ #:neg-sym '- #:add-id #'+ #:neg-id #'-))
 
 ;; mult-op : Infix-Op
-(define mult-op (add/sub-like-op #:add-sym '* #:neg-sym '/ #:add-id #'mult #:neg-id #'inv))
+(define mult-op (add/sub-like-op #:add-sym '* #:neg-sym '/ #:add-id #'* #:neg-id #'/))
 
 ;; expt-op : Infix-Op
-(define expt-op (binary-op #:sym '^ #:id #'ex))
+(define expt-op (binary-op #:sym '^ #:id #'expt))
 
 ;; +-*/^-parser : Infix-Parser
 (define +-*/^-parser
@@ -171,18 +171,18 @@
 
 ;; sqrt-sin-etc-op : Infix-Op
 (define (sqrt-sin-etc-op p)
-  (define-simple-macro (defmultistxcls [id:id param:id] ...)
-    (begin (defstxcls/op id #:sym 'id #:attr op #:id #'param) ...))
+  (define-simple-macro (defmultistxcls [id:id rkt-id:id] ...)
+    (begin (defstxcls/op id #:sym 'id #:attr op #:id #'rkt-id) ...))
   (defmultistxcls
-    [sqrt sqrrt]
-    [sin sine]
-    [cos cosine]
-    [tan tang]
-    [asin asine]
-    [acos acosine]
-    [atan atang]
-    [abs absval]
-    [ln log_e])
+    [sqrt rkt:sqrt]
+    [sin rkt:sin]
+    [cos rkt:cos]
+    [tan rkt:tan]
+    [asin rkt:asin]
+    [acos rkt:acos]
+    [atan rkt:atan]
+    [abs rkt:magnitude]
+    [ln rkt:log])
   (define-simple-macro (define-op-stxcls op:id pat ...)
     (define-syntax-class op #:attributes (op) [pattern pat] ...))
   (define-op-stxcls op :sqrt :sin :cos :tan :asin :acos :atan :abs :ln)
